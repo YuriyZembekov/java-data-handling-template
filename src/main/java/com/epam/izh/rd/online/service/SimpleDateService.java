@@ -1,8 +1,12 @@
 package com.epam.izh.rd.online.service;
 
+import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Year;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 
 public class SimpleDateService implements DateService {
 
@@ -14,7 +18,13 @@ public class SimpleDateService implements DateService {
      */
     @Override
     public String parseDate(LocalDate localDate) {
-        return null;
+        String s = "";
+        try {
+            s = localDate.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        } catch (DateTimeParseException e) {
+            e.printStackTrace();
+        }
+        return s;
     }
 
     /**
@@ -24,8 +34,15 @@ public class SimpleDateService implements DateService {
      * @return дата и время
      */
     @Override
-    public LocalDateTime parseString(String string) {
-        return null;
+    public LocalDateTime parseString(String string) throws IllegalArgumentException {
+        LocalDateTime localDateTime;
+        try {
+            localDateTime = LocalDateTime.parse(string, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        } catch (DateTimeParseException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("Illegal date or date format");
+        }
+        return localDateTime;
     }
 
     /**
@@ -37,7 +54,13 @@ public class SimpleDateService implements DateService {
      */
     @Override
     public String convertToCustomFormat(LocalDate localDate, DateTimeFormatter formatter) {
-        return null;
+        String date = "";
+        try {
+            date = localDate.format(formatter);
+        } catch (DateTimeException e) {
+            e.printStackTrace();
+        }
+        return date;
     }
 
     /**
@@ -47,7 +70,13 @@ public class SimpleDateService implements DateService {
      */
     @Override
     public long getNextLeapYear() {
-        return 0;
+        int leapYear = Year.now().getValue();
+        leapYear++;
+        //Увеличиваем год на еденицу, пока он не будет вискокосным
+        while (!Year.of(leapYear).isLeap()) {
+            leapYear++;
+        }
+        return leapYear;
     }
 
     /**
@@ -57,7 +86,9 @@ public class SimpleDateService implements DateService {
      */
     @Override
     public long getSecondsInYear(int year) {
-        return 0;
+        LocalDateTime firstDateTime = LocalDateTime.of(year, 01, 01, 00, 00);
+        LocalDateTime secondDateTime = firstDateTime.plusYears(1);
+        return firstDateTime.until(secondDateTime, ChronoUnit.SECONDS);
     }
 
 
